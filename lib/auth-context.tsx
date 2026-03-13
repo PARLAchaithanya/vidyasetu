@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { User as SupabaseAuthUser } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
+import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 
 export interface OnboardingData {
   occupation?: string;
@@ -70,6 +70,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let isMounted = true;
 
+    if (!supabase) {
+      setIsLoading(false);
+      return;
+    }
+
     const initializeSession = async () => {
       const { data, error } = await supabase.auth.getSession();
 
@@ -106,6 +111,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
+    if (!supabase) {
+      throw new Error('Supabase is not configured.');
+    }
+
     setIsLoading(true);
     try {
       const { error } = await supabase.auth.signInWithPassword({
@@ -122,6 +131,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signup = async (email: string, password: string, fullName: string) => {
+    if (!supabase) {
+      throw new Error('Supabase is not configured.');
+    }
+
     setIsLoading(true);
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -150,6 +163,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateOnboarding = async (data: OnboardingData) => {
+    if (!supabase) {
+      throw new Error('Supabase is not configured.');
+    }
+
     if (!user) {
       return;
     }
@@ -183,6 +200,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
+    if (!supabase) {
+      throw new Error('Supabase is not configured.');
+    }
+
     const { error } = await supabase.auth.signOut();
 
     if (error) {
